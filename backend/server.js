@@ -29,8 +29,16 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+const router = express.Router();
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "🦄🌈✨👋🌎🌍🌏✨🌈🦄",
+  });
+});
+
 // Auth routes
-app.post("/api/register", async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -48,7 +56,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -73,7 +81,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Jobs routes
-app.get("/api/jobs", authenticateToken, async (req, res) => {
+router.get("/jobs", authenticateToken, async (req, res) => {
   try {
     // Fetch all jobs from the database
     const jobs = await db.select().from(Job).where(eq(Job.userId, req.user.id));
@@ -84,7 +92,7 @@ app.get("/api/jobs", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/alljobs", async (req, res) => {
+router.get("/alljobs", async (req, res) => {
   try {
     // Fetch all jobs from the database
     const jobs = await db.select().from(Job);
@@ -95,7 +103,7 @@ app.get("/api/alljobs", async (req, res) => {
   }
 });
 
-app.post("/api/jobs", authenticateToken, async (req, res) => {
+router.post("/jobs", authenticateToken, async (req, res) => {
   const { title, description, location, category, salary, type } = req.body;
 
   try {
@@ -116,7 +124,7 @@ app.post("/api/jobs", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/jobs/:id", authenticateToken, async (req, res) => {
+router.get("/jobs/:id", authenticateToken, async (req, res) => {
   try {
     // Fetch a specific job by ID
     const job = await db
@@ -135,7 +143,7 @@ app.get("/api/jobs/:id", authenticateToken, async (req, res) => {
   }
 });
 
-app.put("/api/jobs/:id", authenticateToken, async (req, res) => {
+router.put("/jobs/:id", authenticateToken, async (req, res) => {
   const { title, description, location, category, salary, job_type } = req.body;
 
   try {
@@ -165,7 +173,7 @@ app.put("/api/jobs/:id", authenticateToken, async (req, res) => {
   }
 });
 
-app.delete("/api/jobs/:id", authenticateToken, async (req, res) => {
+router.delete("/jobs/:id", authenticateToken, async (req, res) => {
   try {
     // Fetch job to check ownership
     const job = await db
@@ -189,6 +197,8 @@ app.delete("/api/jobs/:id", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Error deleting job" });
   }
 });
+
+app.use("/api/", router);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
